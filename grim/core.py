@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyrsistent import pmap, pvector, s, v
 import attr
 
@@ -14,7 +15,7 @@ class IllegalMove(Exception):
 @attr.s(hash=True)
 class Pawn(object):
 
-    white_character = u"\u2659"
+    white_character = u"♙"
 
     def will_move(self, start, end, board):
         moving_backwards = end[1] < start[1]

@@ -160,7 +160,7 @@ def sq(algebraic_notation):
             break
         rank += ord(letter.lower()) - ord("a")
 
-    return rank, int(algebraic_notation[i:]) - 1
+    return v(rank, int(algebraic_notation[i:]) - 1)
 
 
 

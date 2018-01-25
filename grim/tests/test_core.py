@@ -29,6 +29,12 @@ class TestBoard(TestCase):
         subboard = superboard.subboard(squares=core.rectangle(start, end))
         # FIXME
 
+    def test_cannot_move_on_top(self):
+        pass
+
+    def test_cannot_move_when_not_your_turn(self):
+        pass
+
 
 class TestPawn(TestCase):
     @given(data=strategies.data())

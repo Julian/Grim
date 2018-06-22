@@ -61,13 +61,17 @@ _STANDARD = pmap(
 
 @attr.s(hash=True)
 class Board(object):
+    """
+    A chess board.
+    """
 
-    _contents = attr.ib(default=_STANDARD, repr=False)
+    _pieces = attr.ib(default=_STANDARD, repr=False)
+
     width = attr.ib(default=8)
     height = attr.ib(default=8)
 
     def __getitem__(self, square):
-        return self._contents.get(pvector(square)) or _Empty()
+        return self._pieces.get(pvector(square)) or _Empty()
 
     def __unicode__(self):
         return u"\n".join(
@@ -92,8 +96,8 @@ class Board(object):
 
         """
 
-        contents = self._contents.set(square, piece)
-        return attr.evolve(self, contents=contents)
+        pieces = self._pieces.set(square, piece)
+        return attr.evolve(self, pieces=pieces)
 
     def move(self, start, end):
         """
@@ -114,10 +118,10 @@ class Board(object):
 
         """
 
-        piece = self._contents[start]
+        piece = self._pieces[start]
         piece.will_move(start=start, end=end, board=self)
-        contents = self._contents.remove(start).set(end, piece)
-        return attr.evolve(self, contents=contents)
+        pieces = self._pieces.remove(start).set(end, piece)
+        return attr.evolve(self, pieces=pieces)
 
     def subboard(self, squares):
         """
@@ -138,7 +142,7 @@ class Board(object):
             if piece:
                 present.append((square, piece))
 
-        contents = pmap(
+        pieces = pmap(
             [
                 (square.set(0, x - leftmost).set(1, y - bottommost), piece)
                 for (x, y), piece in present
@@ -146,7 +150,7 @@ class Board(object):
         )
         return attr.evolve(
             self,
-            contents=contents,
+            pieces=pieces,
             width=self.width - leftmost,
             height=self.height - bottommost - 1,
         )

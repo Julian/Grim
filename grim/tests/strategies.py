@@ -34,5 +34,5 @@ def pieces(draw, board, piece=piece(), square=square):
     )
 
 
-def board(empty=core.Board(contents=pmap()), contents=pieces):
-    return strategies.builds(core.Board, contents=pieces(board=empty))
+def board(empty=core.Board(pieces=pmap()), pieces=pieces):
+    return strategies.builds(core.Board, pieces=pieces(board=empty))

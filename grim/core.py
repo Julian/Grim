@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from pyrsistent import pmap, pvector, s, v
+from zope.interface import implementer
 import attr
+
+from grim import interfaces
 
 
 @attr.s(hash=True)
@@ -12,6 +15,7 @@ class IllegalMove(Exception):
     piece = attr.ib()
 
 
+@implementer(interfaces.Piece)
 @attr.s(hash=True)
 class Pawn(object):
 

@@ -2,8 +2,9 @@ from unittest import TestCase
 
 from hypothesis import given, strategies
 from pyrsistent import pmap, v
+from zope.interface import verify
 
-from grim import core
+from grim import core, interfaces
 from grim.tests.strategies import board, pieces, square
 
 
@@ -63,6 +64,9 @@ class TestPawn(TestCase):
         board = empty.set(start, core.Pawn())
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
+
+    def test_it_is_a_piece(self):
+        verify.verifyClass(interfaces.Piece, core.Pawn)
 
 
 class TestRectangle(TestCase):

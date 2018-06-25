@@ -32,8 +32,8 @@ setup(
     packages=find_packages(),
 
     install_requires=["attrs", "pyrsistent"],
-    setup_requires=["vcversioner>=2.16.0.0"],
-    vcversioner={"version_module_paths": ["grim/_version.py"]},
+    setup_requires=["setuptools_scm"],
+    use_scm_version=True,
 
     classifiers=classifiers,
 )

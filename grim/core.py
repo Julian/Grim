@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pyrsistent import pmap, pvector, s, v
+from pyrsistent import dq, pmap, pvector, s, v
 from zope.interface import implementer
 import attr
 
@@ -60,12 +60,24 @@ _STANDARD = pmap(
 
 
 @attr.s(hash=True)
+class Player(object):
+    """
+    A chess player.
+    """
+
+    name = attr.ib()
+
+
+@attr.s(hash=True)
 class Board(object):
     """
     A chess board.
     """
 
     _pieces = attr.ib(default=_STANDARD, repr=False)
+    _players = attr.ib(
+        default=dq(Player(name=u"white"), Player(name=u"black")),
+    )
 
     width = attr.ib(default=8)
     height = attr.ib(default=8)

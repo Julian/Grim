@@ -5,7 +5,7 @@ from pyrsistent import pmap, v
 from zope.interface import verify
 
 from grim import core, interfaces
-from grim.tests.strategies import board, pieces, square
+from grim.tests.strategies import board, moved_board, pieces, players, square
 
 
 class TestBoard(TestCase):
@@ -36,6 +36,39 @@ class TestBoard(TestCase):
     def test_cannot_move_when_not_your_turn(self):
         pass
 
+    @given(data=strategies.data(), players=players)
+    def test_it_is_the_next_players_turn_after_moving(self, data, players):
+        board = core.Board(players=players)
+        moved = data.draw(moved_board(board=board))
+        self.assertEqual(moved.turn_of, players[1])
+
+    def test_movable_from(self):
+        class Cornerer(object):
+            def reachable_from(self, square):
+                return iter(expected)
+
+        square = v(0, 3)
+        board = core.Board(pieces=pmap({square: Cornerer()}))
+        expected = {
+            v(0, 0),
+            v(0, board.height),
+            v(board.width, 0),
+            v(board.width, board.height),
+        }
+        self.assertEqual(set(board.movable_from(square=square)), expected)
+
+    def test_movable_from_capture(self):
+        pass
+
+    def test_movable_from_outside_bounds(self):
+        pass
+
+    def test_movable_from_same_square(self):
+        pass
+
+    def test_movable_from_occupied(self):
+        pass
+
 
 class TestPawn(TestCase):
     @given(data=strategies.data())
@@ -50,7 +83,7 @@ class TestPawn(TestCase):
         board = empty.set(start, core.Pawn())
         moved = board.move(start=start, end=end)
 
-        self.assertEqual(moved, core.Board(pieces=pmap({end: core.Pawn()})))
+        self.assertEqual(pmap(moved.pieces), pmap({end: core.Pawn()}))
 
     @given(data=strategies.data())
     def test_it_cannot_move_backwards(self, data):

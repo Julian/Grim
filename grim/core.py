@@ -21,6 +21,9 @@ class Pawn(object):
 
     white_character = u"♙"
 
+    def reachable_from(self, square):
+        yield square.set(1, square[1] + 1)
+
     def will_move(self, start, end, board):
         moving_backwards = end[1] < start[1]
         if moving_backwards:
@@ -96,6 +99,20 @@ class Board(object):
     def __str__(self):
         return unicode(self).encode("utf-8")
 
+    @property
+    def pieces(self):
+        return self._pieces.iteritems()
+
+    @property
+    def turn_of(self):
+        """
+        The player whose turn it currently is.
+        """
+        return self._players[0]
+
+    def movable_from(self, square):
+        return self[square].reachable_from(square=square)
+
     def set(self, square, piece):
         """
         Set a piece on the given square (regardless of legality).
@@ -133,7 +150,8 @@ class Board(object):
         piece = self._pieces[start]
         piece.will_move(start=start, end=end, board=self)
         pieces = self._pieces.remove(start).set(end, piece)
-        return attr.evolve(self, pieces=pieces)
+        players = self._players.rotate(-1)
+        return attr.evolve(self, pieces=pieces, players=players)
 
     def subboard(self, squares):
         """

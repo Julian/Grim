@@ -1,5 +1,5 @@
 from hypothesis import strategies
-from pyrsistent import pmap, pvector
+from pyrsistent import pdeque, pmap, pvector
 
 from grim import core
 
@@ -36,3 +36,29 @@ def pieces(draw, board, piece=piece(), square=square):
 
 def board(empty=core.Board(pieces=pmap()), pieces=pieces):
     return strategies.builds(core.Board, pieces=pieces(board=empty))
+
+
+@strategies.composite
+def legal_move_on(draw, board):
+    """
+    A legal move (start and end) on the given chess board.
+    """
+    start, _ = draw(strategies.sampled_from(sorted(board.pieces)))
+    end = draw(strategies.sampled_from(sorted(board.movable_from(start))))
+    return start, end
+
+
+def moved_board(board):
+    """
+    A board that is one move away from the given one.
+    """
+    return legal_move_on(board=board).map(
+        lambda (start, end): board.move(start=start, end=end),
+    )
+
+
+def player(name=strategies.text(min_size=1)):
+    return strategies.builds(core.Player, name=name)
+
+
+players = strategies.sets(player(), min_size=2).map(pdeque)

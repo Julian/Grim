@@ -100,6 +100,11 @@ class TestPawn(TestCase):
         verify.verifyClass(interfaces.Piece, core.Pawn)
 
 
+class TestEmpty(TestCase):
+    def test_it_is_a_piece(self):
+        verify.verifyObject(interfaces.Piece, core.Board(pieces=pmap())[0, 0])
+
+
 class TestRectangle(TestCase):
     @given(data=strategies.data())
     def test_it_is_commutative(self, data):

@@ -30,6 +30,7 @@ class Pawn(object):
             raise IllegalMove(start=start, end=end, board=board, piece=self)
 
 
+@implementer(interfaces.Piece)
 @attr.s(hash=True)
 class _Empty(object):
 
@@ -38,6 +39,8 @@ class _Empty(object):
     def __nonzero__(self):
         return False
 
+    def reachable_from(self, square):
+        return s()
 
 _STANDARD = pmap(
     [

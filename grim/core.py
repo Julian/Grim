@@ -85,6 +85,10 @@ class Board(object):
     width = attr.ib(default=8)
     height = attr.ib(default=8)
 
+    def __contains__(self, square):
+        x, y = square
+        return x < self.width and y < self.height
+
     def __getitem__(self, square):
         return self._pieces.get(pvector(square)) or _Empty()
 

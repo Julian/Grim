@@ -31,11 +31,17 @@ class TestBoard(TestCase):
         subboard = superboard.subboard(squares=core.rectangle(start, end))
         # FIXME
 
-    def test_cannot_move_on_top(self):
-        pass
+    def test_contains(self):
+        board = core.Board()
+        self.assertIn(core.sq("A8"), board)
 
-    def test_cannot_move_when_not_your_turn(self):
-        pass
+    def test_not_contains_too_right(self):
+        board = core.Board()
+        self.assertNotIn(core.sq("I1"), board)
+
+    def test_not_contains_too_high(self):
+        board = core.Board()
+        self.assertNotIn(core.sq("H9"), board)
 
     @given(data=strategies.data(), players=players)
     def test_it_is_the_next_players_turn_after_moving(self, data, players):

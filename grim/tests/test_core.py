@@ -1,8 +1,9 @@
 from unittest import TestCase
 
 from hypothesis import given, strategies
-from pyrsistent import pmap, v
-from zope.interface import verify
+from pyrsistent import pmap, s, v
+from zope.interface import implementer, verify
+import attr
 
 from grim import core, interfaces
 from grim.tests.strategies import board, moved_board, pieces, players, square
@@ -43,18 +44,9 @@ class TestBoard(TestCase):
         self.assertEqual(moved.turn_of, players[1])
 
     def test_movable_from(self):
-        class Cornerer(object):
-            def reachable_from(self, square):
-                return iter(expected)
-
         square = v(0, 3)
-        board = core.Board(pieces=pmap({square: Cornerer()}))
-        expected = {
-            v(0, 0),
-            v(0, board.height),
-            v(board.width, 0),
-            v(board.width, board.height),
-        }
+        expected = {v(0, 0), v(0, 7), v(7, 0), v(7, 7)}
+        board = core.Board(pieces=pmap({square: Piece(reachable=expected)}))
         self.assertEqual(set(board.movable_from(square=square)), expected)
 
     def test_movable_from_capture(self):
@@ -114,3 +106,16 @@ class TestRectangle(TestCase):
             set(core.rectangle(start, end)),
             set(core.rectangle(end, start)),
         )
+
+
+@implementer(interfaces.Piece)
+@attr.s
+class Piece(object):
+    """
+    A piece that moves to explicit static squares.
+    """
+
+    _reachable = attr.ib(default=s())
+
+    def reachable_from(self, square):
+        return self._reachable

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pyrsistent import dq, pmap, pvector, s, v
+from pyrsistent import dq, pmap, pset, pvector, s, v
 from zope.interface import implementer
 import attr
 
@@ -21,6 +21,9 @@ class Pawn(object):
 
     white_character = u"♙"
 
+    def capturable_from(self, square):
+        return s()
+
     def reachable_from(self, square):
         yield square.set(1, square[1] + 1)
 
@@ -39,8 +42,12 @@ class _Empty(object):
     def __nonzero__(self):
         return False
 
+    def capturable_from(self, square):
+        return s()
+
     def reachable_from(self, square):
         return s()
+
 
 _STANDARD = pmap(
     [
@@ -118,7 +125,16 @@ class Board(object):
         return self._players[0]
 
     def movable_from(self, square):
-        return self[square].reachable_from(square=square)
+        piece = self[square]
+        reachable = piece.reachable_from(square=square)
+        capturable = piece.capturable_from(square=square)
+        return pset(self._clip(reachable)).update(self._clip(capturable))
+
+    def _clip(self, squares):
+        """
+        The squares that are in-bounds on this board
+        """
+        return (square for square in squares if square in self)
 
     def set(self, square, piece):
         """

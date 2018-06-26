@@ -51,20 +51,40 @@ class TestBoard(TestCase):
 
     def test_movable_from(self):
         square = v(0, 3)
-        expected = {v(0, 0), v(0, 7), v(7, 0), v(7, 7)}
-        board = core.Board(pieces=pmap({square: Piece(reachable=expected)}))
-        self.assertEqual(set(board.movable_from(square=square)), expected)
-
-    def test_movable_from_capture(self):
-        pass
+        reachable = {v(0, 0), v(0, 7)}
+        capturable = {v(0, 0), v(7, 7)}
+        piece = Piece(reachable=reachable, capturable=capturable)
+        board = core.Board(pieces=pmap({square: piece}))
+        self.assertEqual(
+            sorted(board.movable_from(square=square)),
+            [v(0, 0), v(0, 7), v(7, 7)],
+        )
 
     def test_movable_from_outside_bounds(self):
-        pass
+        square = v(0, 3)
+        piece = Piece(reachable=[v(100, 100)], capturable=[v(101, 101)])
+        board = core.Board(pieces=pmap({square: piece}))
+        self.assertEqual(sorted(board.movable_from(square=square)), [])
 
-    def test_movable_from_same_square(self):
-        pass
+    def test_movable_from_empty(self):
+        board = core.Board(pieces=pmap({}))
+        self.assertEqual(sorted(board.movable_from(square=v(0, 0))), [])
+
+    def test_movable_from_capturable(self):
+        start, end = v(0, 0), v(0, 3)
+        reachable = {end, v(0, 7)}
+        capturable = {end, v(7, 7)}
+        piece = Piece(reachable=reachable, capturable=capturable)
+        board = core.Board(pieces=pmap({start: piece, end: Piece()}))
+        self.assertEqual(
+            sorted(board.movable_from(square=start)),
+            [v(0, 3), v(0, 7), v(7, 7)],
+        )
 
     def test_movable_from_occupied(self):
+        pass
+
+    def test_movable_from_not_your_turn(self):
         pass
 
 
@@ -126,7 +146,11 @@ class Piece(object):
     A piece that moves to explicit static squares.
     """
 
+    _capturable = attr.ib(default=s())
     _reachable = attr.ib(default=s())
+
+    def capturable_from(self, square):
+        return self._capturable
 
     def reachable_from(self, square):
         return self._reachable

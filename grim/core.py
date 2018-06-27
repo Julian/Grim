@@ -36,7 +36,9 @@ class Pawn(object):
     white_character = u"♙"
 
     def capturable_from(self, square):
-        return s()
+        x, y = square
+        yield v(x + 1, y + 1)
+        yield v(x - 1, y + 1)
 
     def reachable_from(self, square):
         yield square.set(1, square[1] + 1)

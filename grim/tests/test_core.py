@@ -147,6 +147,27 @@ class TestPawn(PieceMixin, TestCase):
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
 
+    @given(data=strategies.data())
+    def test_it_captures_diagonally(self, data):
+        empty = core.Board.empty()
+
+        squares = core.rectangle(v(1, 0), v(empty.width - 1, empty.height - 1))
+
+        start = data.draw(square(board=empty.subboard(squares=squares)))
+        end = data.draw(
+            strategies.sampled_from(
+                [
+                    v(start[0] + 1, start[1] + 1),
+                    v(start[0] - 1, start[1] + 1),
+                ],
+            ),
+        )
+
+        board = empty.set(start, self.white()).set(end, self.black())
+        moved = board.move(start=start, end=end)
+
+        self.assertEqual(pmap(moved.pieces), pmap({end: self.white()}))
+
 
 class TestEmpty(TestCase):
     def test_it_is_a_piece(self):

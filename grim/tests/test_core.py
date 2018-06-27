@@ -9,6 +9,17 @@ from grim import core, interfaces
 from grim.tests.strategies import board, moved_board, pieces, square
 
 
+class PieceMixin(object):
+    def white(self):
+        return core.WHITE.piece(piece=self.Piece())
+
+    def black(self):
+        return core.BLACK.piece(piece=self.Piece())
+
+    def test_it_is_a_piece(self):
+        verify.verifyClass(interfaces.Piece, self.Piece)
+
+
 class TestBoard(TestCase):
     @given(data=strategies.data())
     def test_set(self, data):
@@ -97,7 +108,10 @@ class TestBoard(TestCase):
         pass
 
 
-class TestPawn(TestCase):
+class TestPawn(PieceMixin, TestCase):
+
+    Piece = core.Pawn
+
     @given(data=strategies.data())
     def test_it_can_move_forward(self, data):
         empty = core.Board(pieces=pmap())
@@ -107,13 +121,10 @@ class TestPawn(TestCase):
         start = data.draw(square(board=empty.subboard(squares=squares)))
         end = v(start[0], start[1] + 1)
 
-        board = empty.set(start, core.WHITE.piece(core.Pawn()))
+        board = empty.set(start, self.white())
         moved = board.move(start=start, end=end)
 
-        self.assertEqual(
-            pmap(moved.pieces),
-            pmap({end: core.WHITE.piece(core.Pawn())}),
-        )
+        self.assertEqual(pmap(moved.pieces), pmap({end: self.white()}))
 
     @given(data=strategies.data())
     def test_it_cannot_move_backwards(self, data):
@@ -124,12 +135,9 @@ class TestPawn(TestCase):
         start = data.draw(square(board=empty.subboard(squares=squares)))
         end = v(start[0], start[1] - 1)
 
-        board = empty.set(start, core.WHITE.piece(core.Pawn()))
+        board = empty.set(start, self.white())
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
-
-    def test_it_is_a_piece(self):
-        verify.verifyClass(interfaces.Piece, core.Pawn)
 
 
 class TestEmpty(TestCase):

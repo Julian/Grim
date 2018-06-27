@@ -57,6 +57,9 @@ class TestBoard(TestCase):
     def test_empty(self):
         self.assertFalse(set(core.Board.empty().pieces))
 
+    def test_dimensions(self):
+        self.assertEqual(core.Board(width=3, height=5).dimensions, v(3, 5))
+
     @given(data=strategies.data())
     def test_it_is_the_next_players_turn_after_moving(self, data):
         board = core.Board()
@@ -135,7 +138,7 @@ class TestPawn(PieceMixin, TestCase):
     def test_it_cannot_move_backwards(self, data):
         empty = core.Board.empty()
 
-        squares = core.rectangle(v(0, 1), v(empty.width, empty.height))
+        squares = core.rectangle(v(0, 1), empty.dimensions)
 
         start = data.draw(square(board=empty.subboard(squares=squares)))
         end = v(start[0], start[1] - 1)

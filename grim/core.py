@@ -133,6 +133,10 @@ class Board(object):
         return cls(pieces=pmap(), **kwargs)
 
     @property
+    def dimensions(self):
+        return v(self.width, self.height)
+
+    @property
     def pieces(self):
         return self._pieces.iteritems()
 
@@ -203,7 +207,7 @@ class Board(object):
         """
 
         present = []
-        leftmost, bottommost = self.width, self.height
+        leftmost, bottommost = self.dimensions
         for square in squares:
             x, y = square
             if x < leftmost:

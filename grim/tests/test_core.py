@@ -6,7 +6,7 @@ from zope.interface import implementer, verify
 import attr
 
 from grim import core, interfaces
-from grim.tests.strategies import board, moved_board, pieces, players, square
+from grim.tests.strategies import board, moved_board, pieces, square
 
 
 class TestBoard(TestCase):
@@ -43,18 +43,20 @@ class TestBoard(TestCase):
         board = core.Board()
         self.assertNotIn(core.sq("H9"), board)
 
-    @given(data=strategies.data(), players=players)
-    def test_it_is_the_next_players_turn_after_moving(self, data, players):
-        board = core.Board(players=players)
+    @given(data=strategies.data())
+    def test_it_is_the_next_players_turn_after_moving(self, data):
+        board = core.Board()
+        self.assertEqual(board.turn_of, core.WHITE)
+
         moved = data.draw(moved_board(board=board))
-        self.assertEqual(moved.turn_of, players[1])
+        self.assertEqual(moved.turn_of, core.BLACK)
 
     def test_movable_from(self):
         square = v(0, 3)
         reachable = {v(0, 0), v(0, 7)}
         capturable = {v(0, 0), v(7, 7)}
         piece = Piece(reachable=reachable, capturable=capturable)
-        board = core.Board(pieces=pmap({square: piece}))
+        board = core.Board(pieces=pmap({square: core.WHITE.piece(piece)}))
         self.assertEqual(
             sorted(board.movable_from(square=square)),
             [v(0, 0), v(0, 7), v(7, 7)],
@@ -63,11 +65,11 @@ class TestBoard(TestCase):
     def test_movable_from_outside_bounds(self):
         square = v(0, 3)
         piece = Piece(reachable=[v(100, 100)], capturable=[v(101, 101)])
-        board = core.Board(pieces=pmap({square: piece}))
+        board = core.Board(pieces=pmap({square: core.WHITE.piece(piece)}))
         self.assertEqual(sorted(board.movable_from(square=square)), [])
 
     def test_movable_from_empty(self):
-        board = core.Board(pieces=pmap({}))
+        board = core.Board(pieces=pmap())
         self.assertEqual(sorted(board.movable_from(square=v(0, 0))), [])
 
     def test_movable_from_capturable(self):
@@ -75,7 +77,14 @@ class TestBoard(TestCase):
         reachable = {end, v(0, 7)}
         capturable = {end, v(7, 7)}
         piece = Piece(reachable=reachable, capturable=capturable)
-        board = core.Board(pieces=pmap({start: piece, end: Piece()}))
+        board = core.Board(
+            pieces=pmap(
+                {
+                    start: core.WHITE.piece(piece),
+                    end: core.BLACK.piece(Piece()),
+                },
+            ),
+        )
         self.assertEqual(
             sorted(board.movable_from(square=start)),
             [v(0, 3), v(0, 7), v(7, 7)],
@@ -98,10 +107,13 @@ class TestPawn(TestCase):
         start = data.draw(square(board=empty.subboard(squares=squares)))
         end = v(start[0], start[1] + 1)
 
-        board = empty.set(start, core.Pawn())
+        board = empty.set(start, core.WHITE.piece(core.Pawn()))
         moved = board.move(start=start, end=end)
 
-        self.assertEqual(pmap(moved.pieces), pmap({end: core.Pawn()}))
+        self.assertEqual(
+            pmap(moved.pieces),
+            pmap({end: core.WHITE.piece(core.Pawn())}),
+        )
 
     @given(data=strategies.data())
     def test_it_cannot_move_backwards(self, data):
@@ -112,7 +124,7 @@ class TestPawn(TestCase):
         start = data.draw(square(board=empty.subboard(squares=squares)))
         end = v(start[0], start[1] - 1)
 
-        board = empty.set(start, core.Pawn())
+        board = empty.set(start, core.WHITE.piece(core.Pawn()))
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
 

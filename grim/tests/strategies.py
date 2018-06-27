@@ -18,11 +18,12 @@ def square(draw, board, max_rank=None, max_file=None):
     )
 
 
+PIECE = {Piece: strategies.builds(Piece) for Piece in core.PIECES}
+
+
 @strategies.composite
 def piece(draw):
-    return draw(
-        strategies.one_of(strategies.builds(Piece) for Piece in core.PIECES),
-    )
+    return draw(strategies.one_of(PIECE.values()))
 
 
 @strategies.composite
@@ -55,10 +56,3 @@ def moved_board(board):
     return legal_move_on(board=board).map(
         lambda (start, end): board.move(start=start, end=end),
     )
-
-
-def player(name=strategies.text(min_size=1)):
-    return strategies.builds(core.Player, name=name)
-
-
-players = strategies.sets(player(), min_size=2).map(pdeque)

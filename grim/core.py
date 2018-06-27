@@ -17,6 +17,20 @@ class IllegalMove(Exception):
 
 @implementer(interfaces.Piece)
 @attr.s(hash=True)
+class _OwnedPiece(object):
+
+    piece = attr.ib()
+    player = attr.ib()
+
+    def capturable_from(self, square):
+        return self.piece.capturable_from(square)
+
+    def reachable_from(self, square):
+        return self.piece.reachable_from(square)
+
+
+@implementer(interfaces.Piece)
+@attr.s(hash=True)
 class Pawn(object):
 
     white_character = u"♙"
@@ -26,11 +40,6 @@ class Pawn(object):
 
     def reachable_from(self, square):
         yield square.set(1, square[1] + 1)
-
-    def will_move(self, start, end, board):
-        moving_backwards = end[1] < start[1]
-        if moving_backwards:
-            raise IllegalMove(start=start, end=end, board=board, piece=self)
 
 
 @implementer(interfaces.Piece)
@@ -49,29 +58,6 @@ class _Empty(object):
         return s()
 
 
-_STANDARD = pmap(
-    [
-        (v(0, 1), Pawn()),
-        (v(1, 1), Pawn()),
-        (v(2, 1), Pawn()),
-        (v(3, 1), Pawn()),
-        (v(4, 1), Pawn()),
-        (v(5, 1), Pawn()),
-        (v(6, 1), Pawn()),
-        (v(7, 1), Pawn()),
-
-        (v(0, 6), Pawn()),
-        (v(1, 6), Pawn()),
-        (v(2, 6), Pawn()),
-        (v(3, 6), Pawn()),
-        (v(4, 6), Pawn()),
-        (v(5, 6), Pawn()),
-        (v(6, 6), Pawn()),
-        (v(7, 6), Pawn()),
-    ]
-)
-
-
 @attr.s(hash=True)
 class Player(object):
     """
@@ -79,6 +65,37 @@ class Player(object):
     """
 
     name = attr.ib()
+
+    def piece(self, piece):
+        return _OwnedPiece(player=self, piece=piece)
+
+
+WHITE = Player(name=u"white")
+BLACK = Player(name=u"black")
+PLAYERS = dq(WHITE, BLACK)
+
+
+_STANDARD = pmap(
+    [
+        (v(0, 1), WHITE.piece(Pawn())),
+        (v(1, 1), WHITE.piece(Pawn())),
+        (v(2, 1), WHITE.piece(Pawn())),
+        (v(3, 1), WHITE.piece(Pawn())),
+        (v(4, 1), WHITE.piece(Pawn())),
+        (v(5, 1), WHITE.piece(Pawn())),
+        (v(6, 1), WHITE.piece(Pawn())),
+        (v(7, 1), WHITE.piece(Pawn())),
+
+        (v(0, 6), BLACK.piece(Pawn())),
+        (v(1, 6), BLACK.piece(Pawn())),
+        (v(2, 6), BLACK.piece(Pawn())),
+        (v(3, 6), BLACK.piece(Pawn())),
+        (v(4, 6), BLACK.piece(Pawn())),
+        (v(5, 6), BLACK.piece(Pawn())),
+        (v(6, 6), BLACK.piece(Pawn())),
+        (v(7, 6), BLACK.piece(Pawn())),
+    ]
+)
 
 
 @attr.s(hash=True)
@@ -88,9 +105,7 @@ class Board(object):
     """
 
     _pieces = attr.ib(default=_STANDARD, repr=False)
-    _players = attr.ib(
-        default=dq(Player(name=u"white"), Player(name=u"black")),
-    )
+    _players = attr.ib(default=PLAYERS)
 
     width = attr.ib(default=8)
     height = attr.ib(default=8)
@@ -171,7 +186,8 @@ class Board(object):
         """
 
         piece = self._pieces[start]
-        piece.will_move(start=start, end=end, board=self)
+        if end not in self.movable_from(square=start):
+            raise IllegalMove(start=start, end=end, board=self, piece=piece)
         pieces = self._pieces.remove(start).set(end, piece)
         players = self._players.rotate(-1)
         return attr.evolve(self, pieces=pieces, players=players)

@@ -128,6 +128,10 @@ class Board(object):
     def __str__(self):
         return unicode(self).encode("utf-8")
 
+    @classmethod
+    def empty(cls, **kwargs):
+        return cls(pieces=pmap(), **kwargs)
+
     @property
     def pieces(self):
         return self._pieces.iteritems()

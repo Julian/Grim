@@ -54,6 +54,9 @@ class TestBoard(TestCase):
         board = core.Board()
         self.assertNotIn(core.sq("H9"), board)
 
+    def test_empty(self):
+        self.assertFalse(set(core.Board.empty().pieces))
+
     @given(data=strategies.data())
     def test_it_is_the_next_players_turn_after_moving(self, data):
         board = core.Board()
@@ -80,8 +83,10 @@ class TestBoard(TestCase):
         self.assertEqual(sorted(board.movable_from(square=square)), [])
 
     def test_movable_from_empty(self):
-        board = core.Board(pieces=pmap())
-        self.assertEqual(sorted(board.movable_from(square=v(0, 0))), [])
+        self.assertEqual(
+            sorted(core.Board.empty().movable_from(square=v(0, 0))),
+            [],
+        )
 
     def test_movable_from_capturable(self):
         start, end = v(0, 0), v(0, 3)
@@ -114,7 +119,7 @@ class TestPawn(PieceMixin, TestCase):
 
     @given(data=strategies.data())
     def test_it_can_move_forward(self, data):
-        empty = core.Board(pieces=pmap())
+        empty = core.Board.empty()
 
         squares = core.rectangle(v(0, 0), v(empty.width, empty.height - 1))
 
@@ -128,7 +133,7 @@ class TestPawn(PieceMixin, TestCase):
 
     @given(data=strategies.data())
     def test_it_cannot_move_backwards(self, data):
-        empty = core.Board(pieces=pmap())
+        empty = core.Board.empty()
 
         squares = core.rectangle(v(0, 1), v(empty.width, empty.height))
 
@@ -148,7 +153,7 @@ class TestEmpty(TestCase):
 class TestRectangle(TestCase):
     @given(data=strategies.data())
     def test_it_is_commutative(self, data):
-        empty = core.Board(pieces=pmap())
+        empty = core.Board.empty()
 
         start = data.draw(square(board=empty))
         end = data.draw(square(board=empty))

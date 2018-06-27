@@ -21,18 +21,14 @@ def square(draw, board, max_rank=None, max_file=None):
 PIECE = {Piece: strategies.builds(Piece) for Piece in core.PIECES}
 
 
-@strategies.composite
-def piece(draw):
-    return draw(strategies.one_of(PIECE.values()))
+def piece():
+    return strategies.one_of(PIECE.values())
 
 
-@strategies.composite
-def pieces(draw, board, piece=piece(), square=square):
-    return draw(
-        strategies.dictionaries(
-            keys=square(board=board), values=piece,
-        ).map(pmap),
-    )
+def pieces(board, piece=piece(), square=square):
+    return strategies.dictionaries(
+        keys=square(board=board), values=piece,
+    ).map(pmap)
 
 
 def board(empty=core.Board(pieces=pmap()), pieces=pieces):

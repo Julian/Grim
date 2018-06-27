@@ -173,8 +173,7 @@ class Board(object):
 
         """
 
-        pieces = self._pieces.set(square, piece)
-        return attr.evolve(self, pieces=pieces)
+        return attr.evolve(self, pieces=self._pieces.set(square, piece))
 
     def move(self, start, end):
         """
@@ -195,7 +194,7 @@ class Board(object):
 
         """
 
-        piece = self._pieces[start]
+        piece = self[start]
         if end not in self.movable_from(square=start):
             raise IllegalMove(start=start, end=end, board=self, piece=piece)
         pieces = self._pieces.remove(start).set(end, piece)

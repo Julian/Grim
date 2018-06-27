@@ -36,7 +36,10 @@ class TestBoard(TestCase):
         start, end = sorted(
             data.draw(
                 strategies.sets(
-                    square(board=superboard), min_size=2, max_size=2),
+                    square(board=superboard),
+                    min_size=2,
+                    max_size=2,
+                ),
             ),
         )
         subboard = superboard.subboard(squares=core.rectangle(start, end))

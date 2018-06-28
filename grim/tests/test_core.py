@@ -67,6 +67,14 @@ class TestBoard(TestCase):
             {pvector(each) for each in itertools.product(range(8), repeat=2)},
         )
 
+    def test_getitem_out_of_bounds(self):
+        board = core.Board()
+        with self.assertRaises(core.NoSuchSquare):
+            board[board.width, board.height]
+
+    def test_slice_out_of_bounds(self):
+        pass
+
     def test_empty(self):
         self.assertFalse(set(core.Board.empty().pieces))
 

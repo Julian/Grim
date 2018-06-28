@@ -7,6 +7,12 @@ from grim import interfaces
 
 
 @attr.s(hash=True)
+class NoSuchSquare(Exception):
+
+    square = attr.ib()
+
+
+@attr.s(hash=True)
 class IllegalMove(Exception):
 
     start = attr.ib()
@@ -135,6 +141,8 @@ class Board(object):
     def __getitem__(self, square):
         if isinstance(square, slice):
             return self.subboard(squares=_rectangle(square.start, square.stop))
+        elif not square in self:
+            raise NoSuchSquare(square)
         return self._pieces.get(pvector(square)) or _Empty()
 
     def __unicode__(self):

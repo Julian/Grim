@@ -111,11 +111,26 @@ class TestBoard(TestCase):
         )
         self.assertEqual(
             sorted(board.movable_from(square=start)),
-            [v(0, 3), v(0, 7), v(7, 7)],
+            [end, v(0, 7), v(7, 7)],
         )
 
     def test_movable_from_occupied(self):
-        pass
+        start, end = v(0, 0), v(0, 3)
+        reachable = {end, v(0, 7)}
+        capturable = {end, v(7, 7)}
+        piece = Piece(reachable=reachable, capturable=capturable)
+        board = core.Board(
+            pieces=pmap(
+                {
+                    start: core.WHITE.piece(piece),
+                    end: core.WHITE.piece(Piece()),
+                },
+            ),
+        )
+        self.assertEqual(
+            sorted(board.movable_from(square=start)),
+            [v(0, 7), v(7, 7)],
+        )
 
     def test_movable_from_not_your_turn(self):
         pass
@@ -125,7 +140,7 @@ class TestPawn(PieceMixin, TestCase):
 
     Piece = core.Pawn
 
-    @given(data=strategies.data(), empty=empty_board))
+    @given(data=strategies.data(), empty=empty_board)
     def test_it_can_move_forward(self, data, empty):
         start = data.draw(square(board=empty[:v(0, empty.height - 1)]))
         end = v(start[0], start[1] + 1)
@@ -135,7 +150,7 @@ class TestPawn(PieceMixin, TestCase):
 
         self.assertEqual(pmap(moved.pieces), pmap({end: self.white()}))
 
-    @given(data=strategies.data(), empty=empty_board))
+    @given(data=strategies.data(), empty=empty_board)
     def test_it_cannot_move_backwards(self, data, empty):
         start = data.draw(square(board=empty[v(0, 1):]))
         end = v(start[0], start[1] - 1)
@@ -144,7 +159,7 @@ class TestPawn(PieceMixin, TestCase):
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
 
-    @given(data=strategies.data(), empty=empty_board))
+    @given(data=strategies.data(), empty=empty_board)
     def test_it_captures_diagonally(self, data, empty):
         middle = empty[v(1, 0):v(empty.width - 1, empty.height - 1)]
         start = data.draw(square(board=middle))

@@ -31,6 +31,9 @@ class _OwnedPiece(object):
     def reachable_from(self, square):
         return self.piece.reachable_from(square)
 
+    def can_be_captured_by(self, player):
+        return player != self.player
+
 
 @implementer(interfaces.Piece)
 @attr.s(hash=True)
@@ -62,6 +65,9 @@ class _Empty(object):
 
     def reachable_from(self, square):
         return s()
+
+    def can_be_captured_by(self, player):
+        return True
 
 
 @attr.s(hash=True)
@@ -158,13 +164,19 @@ class Board(object):
         piece = self[square]
         reachable = piece.reachable_from(square=square)
         capturable = piece.capturable_from(square=square)
-        return pset(self._clip(reachable)).update(self._clip(capturable))
+        return pset(self._in_bounds_and_unoccupied(reachable, capturable))
 
-    def _clip(self, squares):
+    def _in_bounds_and_unoccupied(self, *squares):
         """
-        The squares that are in-bounds on this board
+        The squares that are in-bounds and not occupied on this board.
         """
-        return (square for square in squares if square in self)
+        for each in squares:
+            for square in each:
+                if (
+                    square in self and
+                    self[square].can_be_captured_by(player=self.turn_of)
+                ):
+                    yield square
 
     def set(self, square, piece):
         """

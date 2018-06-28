@@ -121,6 +121,8 @@ class Board(object):
         return x < self.width and y < self.height
 
     def __getitem__(self, square):
+        if isinstance(square, slice):
+            return self.subboard(squares=_rectangle(square.start, square.stop))
         return self._pieces.get(pvector(square)) or _Empty()
 
     def __unicode__(self):
@@ -253,7 +255,7 @@ def sq(algebraic_notation):
 
 
 
-def rectangle(a, b=None):
+def _rectangle(a, b=None):
     """
     Retrieve all the squares that live between a rectangle bounded by 2 points.
 
@@ -261,6 +263,8 @@ def rectangle(a, b=None):
 
     """
 
+    if a is None:
+        a = v(0, 0)
     if b is None:
         a, b = v(0, 0), a
 

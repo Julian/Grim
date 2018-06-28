@@ -42,7 +42,7 @@ class TestBoard(TestCase):
                 ),
             ),
         )
-        subboard = superboard.subboard(squares=core.rectangle(start, end))
+        subboard = superboard[start:end]
         # FIXME
 
     def test_contains(self):
@@ -127,9 +127,7 @@ class TestPawn(PieceMixin, TestCase):
     def test_it_can_move_forward(self, data):
         empty = core.Board.empty()
 
-        squares = core.rectangle(v(0, 0), v(empty.width, empty.height - 1))
-
-        start = data.draw(square(board=empty.subboard(squares=squares)))
+        start = data.draw(square(board=empty[:v(0, empty.height - 1)]))
         end = v(start[0], start[1] + 1)
 
         board = empty.set(start, self.white())
@@ -141,9 +139,7 @@ class TestPawn(PieceMixin, TestCase):
     def test_it_cannot_move_backwards(self, data):
         empty = core.Board.empty()
 
-        squares = core.rectangle(v(0, 1), empty.dimensions)
-
-        start = data.draw(square(board=empty.subboard(squares=squares)))
+        start = data.draw(square(board=empty[v(0, 1):]))
         end = v(start[0], start[1] - 1)
 
         board = empty.set(start, self.white())
@@ -154,9 +150,8 @@ class TestPawn(PieceMixin, TestCase):
     def test_it_captures_diagonally(self, data):
         empty = core.Board.empty()
 
-        squares = core.rectangle(v(1, 0), v(empty.width - 1, empty.height - 1))
-
-        start = data.draw(square(board=empty.subboard(squares=squares)))
+        middle = empty[v(1, 0):v(empty.width - 1, empty.height - 1)]
+        start = data.draw(square(board=middle))
         end = data.draw(
             strategies.sampled_from(
                 [
@@ -175,20 +170,6 @@ class TestPawn(PieceMixin, TestCase):
 class TestEmpty(TestCase):
     def test_it_is_a_piece(self):
         verify.verifyObject(interfaces.Piece, core.Board(pieces=pmap())[0, 0])
-
-
-class TestRectangle(TestCase):
-    @given(data=strategies.data())
-    def test_it_is_commutative(self, data):
-        empty = core.Board.empty()
-
-        start = data.draw(square(board=empty))
-        end = data.draw(square(board=empty))
-
-        self.assertEqual(
-            set(core.rectangle(start, end)),
-            set(core.rectangle(end, start)),
-        )
 
 
 @implementer(interfaces.Piece)

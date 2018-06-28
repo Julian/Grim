@@ -52,3 +52,6 @@ def moved_board(board):
     return legal_move_on(board=board).map(
         lambda (start, end): board.move(start=start, end=end),
     )
+
+
+empty_board = strategies.just(core.Board.empty())

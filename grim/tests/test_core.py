@@ -6,7 +6,9 @@ from zope.interface import implementer, verify
 import attr
 
 from grim import core, interfaces
-from grim.tests.strategies import board, moved_board, pieces, square
+from grim.tests.strategies import (
+    board, empty_board, moved_board, pieces, square,
+)
 
 
 class PieceMixin(object):
@@ -123,10 +125,8 @@ class TestPawn(PieceMixin, TestCase):
 
     Piece = core.Pawn
 
-    @given(data=strategies.data())
-    def test_it_can_move_forward(self, data):
-        empty = core.Board.empty()
-
+    @given(data=strategies.data(), empty=empty_board))
+    def test_it_can_move_forward(self, data, empty):
         start = data.draw(square(board=empty[:v(0, empty.height - 1)]))
         end = v(start[0], start[1] + 1)
 
@@ -135,10 +135,8 @@ class TestPawn(PieceMixin, TestCase):
 
         self.assertEqual(pmap(moved.pieces), pmap({end: self.white()}))
 
-    @given(data=strategies.data())
-    def test_it_cannot_move_backwards(self, data):
-        empty = core.Board.empty()
-
+    @given(data=strategies.data(), empty=empty_board))
+    def test_it_cannot_move_backwards(self, data, empty):
         start = data.draw(square(board=empty[v(0, 1):]))
         end = v(start[0], start[1] - 1)
 
@@ -146,10 +144,8 @@ class TestPawn(PieceMixin, TestCase):
         with self.assertRaises(core.IllegalMove):
             board.move(start=start, end=end)
 
-    @given(data=strategies.data())
-    def test_it_captures_diagonally(self, data):
-        empty = core.Board.empty()
-
+    @given(data=strategies.data(), empty=empty_board))
+    def test_it_captures_diagonally(self, data, empty):
         middle = empty[v(1, 0):v(empty.width - 1, empty.height - 1)]
         start = data.draw(square(board=middle))
         end = data.draw(

@@ -126,6 +126,12 @@ class Board(object):
         x, y = square
         return x < self.width and y < self.height
 
+    def __iter__(self):
+        for x in range(self.width):
+            for y in range(self.height):
+                yield v(x, y)
+
+
     def __getitem__(self, square):
         if isinstance(square, slice):
             return self.subboard(squares=_rectangle(square.start, square.stop))

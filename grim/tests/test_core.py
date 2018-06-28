@@ -1,7 +1,8 @@
 from unittest import TestCase
+import itertools
 
 from hypothesis import given, strategies
-from pyrsistent import pmap, s, v
+from pyrsistent import pmap, pvector, s, v
 from zope.interface import implementer, verify
 import attr
 
@@ -58,6 +59,13 @@ class TestBoard(TestCase):
     def test_not_contains_too_high(self):
         board = core.Board()
         self.assertNotIn(core.sq("H9"), board)
+
+    def test_iter(self):
+        board = core.Board()
+        self.assertEqual(
+            set(board),
+            {pvector(each) for each in itertools.product(range(8), repeat=2)},
+        )
 
     def test_empty(self):
         self.assertFalse(set(core.Board.empty().pieces))

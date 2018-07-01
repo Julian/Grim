@@ -6,10 +6,8 @@ import attr
 from grim import interfaces
 
 
-@attr.s(hash=True)
 class NoSuchSquare(Exception):
-
-    square = attr.ib()
+    pass
 
 
 @attr.s(hash=True)

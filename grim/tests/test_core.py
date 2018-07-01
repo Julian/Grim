@@ -26,11 +26,21 @@ class PieceMixin(object):
 class TestBoard(TestCase):
     @given(data=strategies.data())
     def test_set(self, data):
-        board = core.Board(pieces=pmap())
+        board = core.Board.empty()
+        (square, piece), = data.draw(pieces(board=board, minimum=1, maximum=1))
+        self.assertEqual(
+            board.set(square, piece),
+            core.Board(pieces=pmap([(square, piece)])),
+        )
+
+    @given(data=strategies.data())
+    def test_update(self, data):
+        board = core.Board.empty()
         contents = data.draw(pieces(board=board))
-        for coordinate, piece in contents.iteritems():
-            board = board.set(coordinate, piece)
-        self.assertEqual(board, core.Board(pieces=contents))
+        self.assertEqual(
+            board.update(*contents.iteritems()),
+            core.Board(pieces=contents),
+        )
 
     @given(data=strategies.data())
     def test_rectangular_subboard(self, data):

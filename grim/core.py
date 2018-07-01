@@ -205,7 +205,21 @@ class Board(object):
 
         """
 
-        return attr.evolve(self, pieces=self._pieces.set(square, piece))
+        return self.update((square, piece))
+
+    def update(self, *squares_and_pieces, **kwargs):
+        """
+        Set the given pieces and squares (regardless of legality).
+
+        Returns:
+
+            Board:
+
+                a new board with the pieces in the requested positions
+        """
+
+        pieces = self._pieces.update(pmap(squares_and_pieces))
+        return attr.evolve(self, pieces=pieces, **kwargs)
 
     def move(self, start, end):
         """

@@ -25,9 +25,12 @@ def piece():
     return strategies.one_of(PIECE.values())
 
 
-def pieces(board, piece=piece(), square=square):
+def pieces(board, piece=piece(), square=square, minimum=None, maximum=None):
     return strategies.dictionaries(
-        keys=square(board=board), values=piece,
+        keys=square(board=board),
+        values=piece,
+        min_size=minimum,
+        max_size=maximum,
     ).map(pmap)
 
 

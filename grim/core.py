@@ -28,7 +28,7 @@ class _OwnedPiece(object):
     piece = attr.ib()
     player = attr.ib()
 
-    def __unicode__(self):
+    def for_ascii_board(self):
         return getattr(self.piece, self.player.name + "_character")
 
     def capturable_from(self, square):
@@ -57,13 +57,13 @@ class Pawn(object):
         yield square.set(1, square[1] + 1)
 
 
-@implementer(interfaces.Piece)
+@implementer(interfaces._OnBoard)
 @attr.s(hash=True)
 class _Empty(object):
     def __nonzero__(self):
         return False
 
-    def __unicode__(self):
+    def for_ascii_board(self):
         return " "
 
     def capturable_from(self, square):
@@ -148,7 +148,8 @@ class Board(object):
     def __unicode__(self):
         return u"\n".join(
             u"".join(
-                u" " + unicode(self[i, j]) + u" " for i in xrange(self.width)
+                self[i, j].for_ascii_board().center(3)
+                for i in xrange(self.width)
             ) for j in xrange(self.height)
         )
 
@@ -278,7 +279,6 @@ def sq(algebraic_notation):
         rank += ord(letter.lower()) - ord("a")
 
     return v(rank, int(algebraic_notation[i:]) - 1)
-
 
 
 def _rectangle(a, b=None):

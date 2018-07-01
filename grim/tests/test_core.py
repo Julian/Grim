@@ -196,7 +196,10 @@ class TestPawn(PieceMixin, TestCase):
 
 class TestEmpty(TestCase):
     def test_it_is_a_piece(self):
-        verify.verifyObject(interfaces.Piece, core.Board(pieces=pmap())[0, 0])
+        verify.verifyObject(
+            interfaces._OnBoard,
+            core.Board(pieces=pmap())[0, 0],
+        )
 
 
 @implementer(interfaces.Piece)
@@ -205,6 +208,9 @@ class Piece(object):
     """
     A piece that moves to explicit static squares.
     """
+
+    black_character = u" "
+    white_character = u" "
 
     _capturable = attr.ib(default=s())
     _reachable = attr.ib(default=s())
